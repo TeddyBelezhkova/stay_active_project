@@ -1,0 +1,27 @@
+{% extends 'shared/base.html' %}
+
+{% block title %}Participants - Stay Active{% endblock %}
+
+{% block content %}
+<div class="header-action-row">
+    <h2>Participants Directory</h2>
+    <a href="{% url 'participants:create' %}" class="btn btn-primary">+ Add Participant</a>
+</div>
+
+<div class="cards-grid">
+    {% for participant in participants %}
+    <div class="card">
+        <h3>{{ participant.full_name }}</h3>
+        <p><strong>Department:</strong> {{ participant.department.name }}</p>
+        <p><strong>Email:</strong> {{ participant.email }}</p>
+        <div class="card-actions">
+            <a href="{% url 'participants:detail' pk=participant.pk %}" class="btn btn-sm">View Profile</a>
+            <a href="{% url 'participants:update' pk=participant.pk %}" class="btn btn-sm btn-secondary">Edit</a>
+            <a href="{% url 'participants:delete' pk=participant.pk %}" class="btn btn-sm btn-danger">Delete</a>
+        </div>
+    </div>
+    {% empty %}
+    <p>No participants registered yet.</p>
+    {% endfor %}
+</div>
+{% endblock %}

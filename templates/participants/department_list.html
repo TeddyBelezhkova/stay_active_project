@@ -1,0 +1,18 @@
+{% extends 'shared/base.html' %}
+
+{% block title %}Departments – Stay Active{% endblock %}
+
+{% block content %}
+<div class="header-action-row">
+    <h2>Departments</h2>
+    <a href="{% url 'participants:department_create' %}" class="btn btn-primary">+ Add Department</a>
+</div>
+
+<ul>
+    {% for department in departments %}
+        <li><strong>{{ department.name }}</strong> — {{ department.description }}</li>
+    {% empty %}
+        <li>No departments added yet.</li>
+    {% endfor %}
+</ul>
+{% endblock %}

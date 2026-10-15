@@ -1,0 +1,14 @@
+{% extends 'shared/base.html' %}
+
+{% block title %}{{ title }} - Stay Active{% endblock %}
+
+{% block content %}
+<h2>{{ title }}</h2>
+
+<form method="post" class="form-container">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Save Participant</button>
+    <a href="{% url 'participants:list' %}" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock %}

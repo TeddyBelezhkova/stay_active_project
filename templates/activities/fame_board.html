@@ -1,0 +1,46 @@
+{% extends 'shared/base.html' %}
+
+{% block title %}Fame Board - Stay Active{% endblock %}
+
+{% block content %}
+<h2>🏆 Wall of Fame (Proof Photos)</h2>
+
+<div class="cards-grid">
+    {% for log in logs %}
+    <div class="card fame-card">
+        <h3>{{ log.participant.full_name }}</h3>
+        <p>{{ log.get_activity_type_display }} — {{ log.distance_km }} KM ({{ log.activity_date }})</p>
+        <img src="{{ log.proof_photo.url }}" alt="Proof Photo" style="max-width: 100%; border-radius: 8px;">
+
+        <div class="reactions-box">
+            <form method="post" action="{% url 'activities:add_reaction' pk=log.pk %}">
+                {% csrf_token %}
+                <button name="reaction_type" value="like">👍</button>
+                <button name="reaction_type" value="fire">🔥</button>
+                <button name="reaction_type" value="clap">👏</button>
+                <button name="reaction_type" value="trophy">🏆</button>
+                <span>({{ log.reactions.count }} reactions)</span>
+            </form>
+        </div>
+
+        <div class="comments-box">
+            <h4>Comments:</h4>
+            {% for c in log.comments.all %}
+                <p><strong>{{ c.author_name }}:</strong> {{ c.content }}</p>
+            {% empty %}
+                <p><small>No comments yet.</small></p>
+            {% endfor %}
+
+            <form method="post" action="{% url 'activities:add_comment' pk=log.pk %}">
+                {% csrf_token %}
+                <input type="text" name="author_name" placeholder="Your name" required>
+                <input type="text" name="content" placeholder="Add a comment..." required>
+                <button type="submit" class="btn btn-sm btn-primary">Comment</button>
+            </form>
+        </div>
+    </div>
+    {% empty %}
+    <p>No public photos posted on the Fame Board yet!</p>
+    {% endfor %}
+</div>
+{% endblock %}

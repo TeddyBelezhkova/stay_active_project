@@ -1,0 +1,23 @@
+{% extends 'shared/base.html' %}
+
+{% block title %}Badges - Stay Active{% endblock %}
+
+{% block content %}
+<div class="header-action-row">
+    <h2>Badge Gallery</h2>
+    <a href="{% url 'activities:badge_create' %}" class="btn btn-primary">+ Create New Badge</a>
+</div>
+
+<div class="cards-grid">
+    {% for badge in badges %}
+    <div class="card">
+        <h3>🏆 {{ badge.title }}</h3>
+        <p><strong>Criteria:</strong> {{ badge.criteria }}</p>
+        <p>{{ badge.description }}</p>
+        <p><small>Earned by {{ badge.participants.count }} participant(s)</small></p>
+    </div>
+    {% empty %}
+    <p>No badges created yet.</p>
+    {% endfor %}
+</div>
+{% endblock %}

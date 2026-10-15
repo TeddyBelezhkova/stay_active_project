@@ -1,0 +1,41 @@
+{% extends 'shared/base.html' %}
+
+{% block title %}Activity Logs - Stay Active{% endblock %}
+
+{% block content %}
+<div class="header-action-row">
+    <h2>Workout Activity Logs</h2>
+    <div>
+        <a href="{% url 'activities:fame_board' %}" class="btn btn-secondary">🏆 Wall of Fame</a>
+        <a href="{% url 'activities:create' %}" class="btn btn-primary">+ Log Workout</a>
+    </div>
+</div>
+
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>Participant</th>
+            <th>Type</th>
+            <th>Metric/KM</th>
+            <th>Date</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for activity in activities %}
+        <tr>
+            <td>{{ activity.participant.full_name }}</td>
+            <td>{{ activity.get_activity_type_display }}</td>
+            <td>{{ activity.distance_km }}</td>
+            <td>{{ activity.activity_date }}</td>
+            <td>
+                <a href="{% url 'activities:update' pk=activity.pk %}" class="btn btn-sm btn-secondary">Edit</a>
+                <a href="{% url 'activities:delete' pk=activity.pk %}" class="btn btn-sm btn-danger">Delete</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5">No workout entries logged yet.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

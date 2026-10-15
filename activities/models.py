@@ -2,8 +2,10 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.utils import timezone
+from django.utils.text import slugify
 
 from participants.models import Participant
+from activities.validators import FileSizeValidator
 
 
 def validate_not_future_date(value):
@@ -16,6 +18,7 @@ class Badge(models.Model):
         max_length=60,
         unique=True,
     )
+    slug = models.SlugField(unique=True, blank=True, null=True)
     description = models.TextField(
         help_text='Requirements or criteria to earn this badge.',
     )
@@ -27,7 +30,7 @@ class Badge(models.Model):
 
     # Flexible textual requirement (e.g., "Log 10 Yoga Sessions", "Hit 100 KM")
     criteria = models.CharField(
-        max_length=100,
+        max_length=255,
         default='Complete challenge goal',
         help_text="e.g., 'Log 10 Yoga sessions', 'Run 50 KM', or 'Complete 5 workouts in a week'.",
     )
@@ -46,6 +49,21 @@ class Badge(models.Model):
         ordering = ['title']
         verbose_name = 'Badge'
         verbose_name_plural = 'Badges'
+
+    @staticmethod
+    def get_default_badge_icon(activity_type):
+        # Returns relative static fallback path based on activity category.
+        icons = {
+            'running': 'images/badges/runner.png',
+            'cycling': 'images/badges/bike.png',
+            'swimming': 'images/badges/swimmer.png',
+        }
+        return icons.get(activity_type, 'images/badges/default.png')
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.title)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.title
@@ -91,6 +109,19 @@ class ActivityLog(models.Model):
         help_text='Enter distance in KM or workout metric equivalent (e.g. duration in hours/units)'
     )
 
+    proof_photo = models.ImageField(
+        upload_to='proof_photos/',
+        blank=True,
+        null=True,
+        validators=[FileSizeValidator(max_mb=5)],
+        help_text="Upload a photo as proof of achievement (max 5 MB)."
+    )
+
+    is_private = models.BooleanField(
+        default=False,
+        verbose_name='Hide photo from public Fame Board',
+    )
+
     activity_date = models.DateField(
         validators=[validate_not_future_date],  #using custom validator
         help_text='Date when activity was performed.',
@@ -110,10 +141,49 @@ class ActivityLog(models.Model):
         verbose_name_plural = 'Activity Logs'
 
     def __str__(self):
-        return f"{self.participant.full_name} - {self.activity_type} ({self.distance_km})"
+        return f"{self.participant.full_name} – {self.get_activity_type_display()} ({self.activity_date})"
 
 
 
+class ActivityComment(models.Model):
+    activity = models.ForeignKey(
+        ActivityLog,
+        on_delete=models.CASCADE,
+        related_name='comments',
+    )
+    author_name = models.CharField(max_length=100)
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        ordering = ['created_at']
+        verbose_name = 'Activity Comment'
+        verbose_name_plural = 'Activity Comments'
+
+    def __str__(self):
+        return f"Comment by {self.author_name} on {self.activity}"
+
+class ActivityReaction(models.Model):
+    REACTION_CHOICES = [
+        ('like', '👍 Like'),
+        ('fire', '🔥 Fire'),
+        ('clap', '👏 Clap'),
+        ('trophy', '🏆 Trophy'),
+    ]
+
+    activity = models.ForeignKey(
+        ActivityLog,
+        on_delete=models.CASCADE,
+        related_name='reactions',
+    )
+    reaction_type = models.CharField(max_length=20, choices=REACTION_CHOICES)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Activity Reaction'
+        verbose_name_plural = 'Activity Reactions'
+
+    def __str__(self):
+        return f"{self.get_reaction_type_display()} on {self.activity}"
 
 

@@ -1,0 +1,23 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Stay Active{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+    {% include 'shared/header.html' %}
+    {% include 'shared/nav.html' %}
+
+    <main class="container content-area">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    {% include 'shared/footer.html' %}
+
+</body>
+</html>

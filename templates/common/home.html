@@ -1,0 +1,29 @@
+{% extends 'shared/base.html' %}
+
+{% block title %}Home - Stay Active{% endblock %}
+
+{% block content %}
+<section class="hero-section">
+    <h2>Welcome to Stay Active Workspace!</h2>
+    <p>Track your physical achievements, earn corporate milestones, and showcase your workouts.</p>
+</section>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <h3>{{ total_participants|default:0 }}</h3>
+        <p>Active Participants</p>
+    </div>
+    <div class="stat-card">
+        <h3>{{ total_departments|default:0 }}</h3>
+        <p>Departments</p>
+    </div>
+    <div class="stat-card">
+        <h3>{{ total_activities|default:0 }}</h3>
+        <p>Activities Logged</p>
+    </div>
+    <div class="stat-card">
+        <h3>{{ total_badges|default:0 }}</h3>
+        <p>Badges Awarded</p>
+    </div>
+</div>
+{% endblock %}

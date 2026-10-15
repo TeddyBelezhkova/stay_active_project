@@ -1,0 +1,43 @@
+{% extends 'shared/base.html' %}
+
+{% block title %}{{ participant.full_name }} - Profile{% endblock %}
+
+{% block content %}
+<div class="profile-header">
+    <h2>{{ participant.full_name }}</h2>
+    <p><strong>Department:</strong> {{ participant.department.name }} | <strong>Email:</strong> {{ participant.email }}</p>
+</div>
+
+<hr>
+
+<div class="profile-section">
+    <h3>Awarded Badges</h3>
+    <div class="badges-row">
+        {% for badge in badges %}
+            <span class="badge-tag">🏆 {{ badge.title }}</span>
+        {% empty %}
+            <p>No badges earned yet.</p>
+        {% endfor %}
+    </div>
+
+    <form method="post" action="{% url 'activities:award_badge' participant_pk=participant.pk %}" class="inline-form">
+        {% csrf_token %}
+        <label>Award Badge:</label>
+        {{ award_form.badge }}
+        <button type="submit" class="btn btn-sm btn-primary">Award</button>
+    </form>
+</div>
+
+<hr>
+
+<div class="profile-section">
+    <h3>Activity History</h3>
+    <ul>
+        {% for act in activities %}
+            <li>{{ act.get_activity_type_display }} — {{ act.distance_km }} KM on {{ act.activity_date }}</li>
+        {% empty %}
+            <li>No activity logged yet.</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}
