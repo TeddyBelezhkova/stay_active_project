@@ -1,0 +1,16 @@
+{% extends 'shared/base.html' %}
+
+{% block title %}Delete Department - Stay Active{% endblock %}
+
+{% block content %}
+<div class="confirm-delete-container">
+    <h2>Are you sure you want to delete department "{{ department.name }}"?</h2>
+    <p>This action cannot be undone.</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+        <a href="{% url 'participants:department_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

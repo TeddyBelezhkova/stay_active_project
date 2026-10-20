@@ -1,5 +1,5 @@
 from django import forms
-from .models import Badge, ActivityLog
+from .models import Badge, ActivityLog, ActivityComment
 
 class BadgeForm(forms.ModelForm):
     class Meta:
@@ -33,6 +33,15 @@ class ActivityLogForm(forms.ModelForm):
             'proof_photo': forms.FileInput(attrs={'class': 'form-control'}),
             'is_private': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
              }
+
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = ActivityComment
+        fields = ['author_name', 'content']
+        widgets = {
+            'author_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Your name'}),
+            'content': forms.Textarea(attrs={'class': 'form-control', 'rows': 2, 'placeholder': 'Add a comment...'}),
+        }
 
 class AwardBadgeForm(forms.Form):
     #UI Form to award an existing badge to a participant.

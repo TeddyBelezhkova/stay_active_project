@@ -18,6 +18,8 @@ urlpatterns = [
     # Badge URLs
     path('badges/', views.badge_list, name='badge_list'),
     path('badges/add/', views.badge_create, name='badge_create'),
+    path('badges/<int:pk>/edit/', views.badge_update, name='badge_edit'),
+    path('badges/<int:pk>/delete/', views.badge_delete, name='badge_delete'),
     path('badges/award/<int:participant_pk>/', views.award_badge, name='award_badge'),
 
 ]

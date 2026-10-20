@@ -52,7 +52,9 @@ class Participant(models.Model):
     # ForeignKey (One-To-Many relationship) linking employee to a single Department.
     department = models.ForeignKey(
         Department,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name='participants',
         help_text='Select the department this employee belongs to.',
     )

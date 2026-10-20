@@ -7,6 +7,8 @@ urlpatterns = [
     # Department URLS
     path('departments/', views.department_list, name='department_list'),
     path('departments/add/', views.department_create, name='department_create'),
+    path('departments/<int:pk>/edit/', views.department_update, name='department_edit' ),
+    path('departments/<int:pk>/delete/', views.department_delete, name='department_delete'),
 
     # Participants URLs
     path("", views.participant_list, name='list'),

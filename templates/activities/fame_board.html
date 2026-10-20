@@ -3,38 +3,49 @@
 {% block title %}Fame Board - Stay Active{% endblock %}
 
 {% block content %}
-<h2>🏆 Wall of Fame (Proof Photos)</h2>
-
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h2>🏆 Wall of Fame (Proof Photos)</h2>
+    <a href="{% url 'activities:list' %}" class="btn btn-secondary">← Back to Activity Logs</a>
+</div>
 <div class="cards-grid">
     {% for log in logs %}
-    <div class="card fame-card">
+    <div class="card fame-card" id="{{ log.pk }}">
         <h3>{{ log.participant.full_name }}</h3>
         <p>{{ log.get_activity_type_display }} — {{ log.distance_km }} KM ({{ log.activity_date }})</p>
-        <img src="{{ log.proof_photo.url }}" alt="Proof Photo" style="max-width: 100%; border-radius: 8px;">
+
+        <!-- Image size limited to 50% container width -->
+        <div class="photo-container" style="text-align: center; margin: 15px 0;">
+            <img src="{{ log.proof_photo.url }}" alt="Proof Photo" style="max-width: 50%; max-height: 250px; border-radius: 8px; object-fit: cover;">
+        </div>
 
         <div class="reactions-box">
             <form method="post" action="{% url 'activities:add_reaction' pk=log.pk %}">
                 {% csrf_token %}
-                <button name="reaction_type" value="like">👍</button>
-                <button name="reaction_type" value="fire">🔥</button>
-                <button name="reaction_type" value="clap">👏</button>
-                <button name="reaction_type" value="trophy">🏆</button>
-                <span>({{ log.reactions.count }} reactions)</span>
+                <button name="reaction_type" value="like" class="btn btn-sm btn-outline">👍 {{ log.like_count }}</button>
+                <button name="reaction_type" value="fire" class="btn btn-sm btn-outline">🔥 {{ log.fire_count }}</button>
+                <button name="reaction_type" value="clap" class="btn btn-sm btn-outline">👏 {{ log.clap_count }}</button>
+                <button name="reaction_type" value="trophy" class="btn btn-sm btn-outline">🏆 {{ log.trophy_count }}</button>
             </form>
         </div>
 
-        <div class="comments-box">
+        <div class="comments-box" style="margin-top: 15px;">
             <h4>Comments:</h4>
             {% for c in log.comments.all %}
-                <p><strong>{{ c.author_name }}:</strong> {{ c.content }}</p>
+                <p>
+                    <strong>{{ c.author_name }}</strong>
+                    <small style="color: #777;">({{ c.created_at|date:"M d, Y H:i" }})</small>:
+                    {{ c.content }}
+                </p>
             {% empty %}
                 <p><small>No comments yet.</small></p>
             {% endfor %}
 
             <form method="post" action="{% url 'activities:add_comment' pk=log.pk %}">
                 {% csrf_token %}
-                <input type="text" name="author_name" placeholder="Your name" required>
-                <input type="text" name="content" placeholder="Add a comment..." required>
+                <div class="mb-2">
+                    <input type="text" name="author_name" class="form-control mb-1" placeholder="Your name" required>
+                    <input type="text" name="content" class="form-control" placeholder="Add a comment..." required>
+                </div>
                 <button type="submit" class="btn btn-sm btn-primary">Comment</button>
             </form>
         </div>

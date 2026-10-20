@@ -19,6 +19,24 @@ def department_create(request):
         form = DepartmentForm()
     return render(request, 'participants/department_form.html', {'form': form, 'title': 'Add Department'})
 
+def department_update(request, pk):
+    department = get_object_or_404(Department, pk=pk)
+    if request.method == 'POST':
+        form = DepartmentForm(request.POST, instance=department)
+        if form.is_valid():
+            form.save()
+            return redirect('participants:department_list')
+    else:
+        form = DepartmentForm(instance=department)
+    return render(request, 'participants/department_form.html', {'form': form, 'title': 'Edit Department'})
+
+def department_delete(request, pk):
+    department = get_object_or_404(Department, pk=pk)
+    if request.method == 'POST':
+        department.delete()
+        return redirect('participants:department_list')
+    return render(request, 'participants/department_confirm_delete.html', {'department': department})
+
 
 def participant_list(request):
     participants = Participant.objects.select_related('department').all()

@@ -1,0 +1,16 @@
+{% extends 'shared/base.html' %}
+
+{% block title %}Delete Badge - Stay Active{% endblock %}
+
+{% block content %}
+<div class="confirm-delete-container">
+    <h2>Are you sure you want to delete badge "{{ badge.title }}"?</h2>
+    <p>This action cannot be undone.</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+        <a href="{% url 'activities:badge_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

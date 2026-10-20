@@ -12,7 +12,16 @@
     {% for participant in participants %}
     <div class="card">
         <h3>{{ participant.full_name }}</h3>
-        <p><strong>Department:</strong> {{ participant.department.name }}</p>
+
+        <p>
+            <strong>Department:</strong>
+            {% if participant.department %}
+                {{ participant.department.name }}
+            {%  else %}
+                <em>Not assigned</em>
+            {% endif %}
+        </p>
+
         <p><strong>Email:</strong> {{ participant.email }}</p>
         <div class="card-actions">
             <a href="{% url 'participants:detail' pk=participant.pk %}" class="btn btn-sm">View Profile</a>

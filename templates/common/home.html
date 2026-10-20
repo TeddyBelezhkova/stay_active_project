@@ -26,4 +26,35 @@
         <p>Badges Awarded</p>
     </div>
 </div>
+
+<hr style="margin: 40px 0;">
+
+<section class="leaderboard-section">
+        <h2 style="text-align: center; margin-bottom: 20px;">🏆 Corporate Badge Leaderboard</h2>
+
+    {% for p in leaderboard %}
+    <div class="leaderboard-card" style="background: #eef2f7; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 6px solid #3498db;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h3>
+                    {% if forloop.counter == 1 %}🥇{% elif forloop.counter == 2 %}🥈{% elif forloop.counter == 3 %}🥉{% else %}⭐{% endif %}
+                    {{ p.full_name }}
+                </h3>
+                <p><strong>Department:</strong> {{ p.department.name }} | <strong>Total Badges:</strong> {{ p.badge_count }}</p>
+            </div>
+        </div>
+        <div class="badge-gallery" style="margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
+            {% for badge in p.badges.all %}
+                <span style="background: #fff; padding: 5px 10px; border-radius: 15px; border: 1px solid #ccc; font-size: 0.85rem;">
+                    🏆 {{ badge.title }}
+                </span>
+            {% empty %}
+                <small>No badges earned yet.</small>
+            {% endfor %}
+        </div>
+    </div>
+    {% empty %}
+    <p style="text-align: center;">No participants on the leaderboard yet.</p>
+    {% endfor %}
+</section>
 {% endblock %}

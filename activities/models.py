@@ -177,13 +177,15 @@ class ActivityReaction(models.Model):
         related_name='reactions',
     )
     reaction_type = models.CharField(max_length=20, choices=REACTION_CHOICES)
+    user_identifier = models.CharField(max_length=100, default='anonymous')
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        unique_together = ('activity', 'reaction_type', 'user_identifier')
         verbose_name = 'Activity Reaction'
         verbose_name_plural = 'Activity Reactions'
 
     def __str__(self):
-        return f"{self.get_reaction_type_display()} on {self.activity}"
+        return f"{self.get_reaction_type_display()} by {self.user_identifier} on {self.activity}"
 
 

@@ -10,7 +10,13 @@
 
 <ul>
     {% for department in departments %}
-        <li><strong>{{ department.name }}</strong> — {{ department.description }}</li>
+        <li style="margin-bottom: 10px;">
+            <strong>{{ department.name }}</strong> — {{ department.description }}
+            <span style="margin-bottom: 15px;">
+                <a href="{% url 'participants:department_edit' pk=department.pk %}" class="btn btn-sm btn-secondary">Edit</a>
+                <a href="{% url 'participants:department_delete' pk=department.pk %}" class="btn btn-sm btn-danger">Delete</a>
+            </span>
+        </li>
     {% empty %}
         <li>No departments added yet.</li>
     {% endfor %}
