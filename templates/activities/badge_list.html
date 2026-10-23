@@ -1,6 +1,7 @@
 {% extends 'shared/base.html' %}
+{% load static %}
 
-{% block title %}Badges - Stay Active{% endblock %}
+{% block title %}Badge Gallery - Stay Active{% endblock %}
 
 {% block content %}
 <div class="header-action-row">
@@ -10,17 +11,28 @@
 
 <div class="cards-grid">
     {% for badge in badges %}
-    <div class="card">
-        <h3>🏆 {{ badge.title }}</h3>
-        <p><strong>Criteria:</strong> {{ badge.criteria }}</p>
-        <p>{{ badge.description }}</p>
-        <p><small>Earned by {{ badge.participants.count }} participant(s)</small></p>
+    <div class="card badge-display-card">
+        <!-- Render local static badge graphic using auto-generated slug -->
+        <img src="{% static 'images/badges/' %}{{ badge.slug }}.png"
+             alt="{{ badge.title }}"
+             class="badge-display-img"
+             onerror="this.onerror=null; this.src='{% static 'images/badges/default.png' %}';">
 
-        <div style="margin-top: 15px; display: flex; gap: 10px;">
+        <h3 style="margin: 0 0 8px 0; color: var(--primary-blue);">{{ badge.title }}</h3>
+        <p style="margin: 4px 0;"><strong>Criteria:</strong> {{ badge.criteria }}</p>
+
+        {% if badge.description %}
+            <p style="margin: 4px 0; font-size: 0.9rem; color: #64748b;">{{ badge.description }}</p>
+        {% endif %}
+
+        <p style="margin: 8px 0; font-size: 0.85rem; font-weight: 600; color: #475569;">
+            Earned by {{ badge.participants.count }} participant(s)
+        </p>
+
+        <div class="card-actions" style="margin-top: 15px; display: flex; gap: 8px; justify-content: center;">
             <a href="{% url 'activities:badge_edit' pk=badge.pk %}" class="btn btn-sm btn-secondary">Edit</a>
             <a href="{% url 'activities:badge_delete' pk=badge.pk %}" class="btn btn-sm btn-danger">Delete</a>
         </div>
-
     </div>
     {% empty %}
     <p>No badges created yet.</p>
