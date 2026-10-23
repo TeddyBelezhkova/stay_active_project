@@ -3,39 +3,94 @@
 {% block title %}Activity Logs - Stay Active{% endblock %}
 
 {% block content %}
-<div class="header-action-row">
-    <h2>Workout Activity Logs</h2>
-    <div>
-        <a href="{% url 'activities:fame_board' %}" class="btn btn-secondary">🏆 Wall of Fame</a>
-        <a href="{% url 'activities:create' %}" class="btn btn-primary">+ Log Workout</a>
-    </div>
+<div class="header-action-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h2>Activity Logs</h2>
+    <a href="{% url 'activities:create' %}" class="btn btn-primary">+ Log Workout</a>
 </div>
 
-<table class="data-table">
-    <thead>
-        <tr>
-            <th>Participant</th>
-            <th>Type</th>
-            <th>Metric/KM</th>
-            <th>Date</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for activity in activities %}
-        <tr>
-            <td>{{ activity.participant.full_name }}</td>
-            <td>{{ activity.get_activity_type_display }}</td>
-            <td>{{ activity.distance_km }}</td>
-            <td>{{ activity.activity_date }}</td>
-            <td>
-                <a href="{% url 'activities:update' pk=activity.pk %}" class="btn btn-sm btn-secondary">Edit</a>
-                <a href="{% url 'activities:delete' pk=activity.pk %}" class="btn btn-sm btn-danger">Delete</a>
-            </td>
-        </tr>
-        {% empty %}
-        <tr><td colspan="5">No workout entries logged yet.</td></tr>
-        {% endfor %}
-    </tbody>
-</table>
+<!-- Search & Type Filter Bar -->
+<div class="filter-bar" style="margin-bottom: 25px; background: #f8f9fa; padding: 16px; border-radius: 8px;">
+    <form id="activity-search-form" method="get" action="{% url 'activities:list' %}" style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 0;">
+
+        <!-- Live Search Input -->
+        <input
+            type="text"
+            id="activity-search-input"
+            name="q"
+            value="{{ search_query }}"
+            placeholder="Search by notes or participant name..."
+            autocomplete="off"
+            style="padding: 8px 12px; border-radius: 4px; border: 1px solid #ccc; flex: 1; min-width: 220px;"
+        />
+
+        <!-- Activity Type Dropdown -->
+        <select name="type" onchange="this.form.submit()" style="padding: 8px 12px; border-radius: 4px; border: 1px solid #ccc;">
+            <option value="">All Activity Types</option>
+            {% for code, label in activity_types %}
+                <option value="{{ code }}" {% if selected_type == code %}selected{% endif %}>
+                    {{ label }}
+                </option>
+            {% endfor %}
+        </select>
+
+        {% if search_query or selected_type %}
+            <a href="{% url 'activities:list' %}" class="btn btn-secondary">Clear Filters</a>
+        {% endif %}
+    </form>
+</div>
+
+<!-- Formatted Cards Grid -->
+<div class="cards-grid">
+    {% for activity in activities %}
+    <div class="card" style="background: #fff; padding: 18px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <h3 style="margin: 0;">{{ activity.participant.full_name }}</h3>
+            <span style="background: #e2e8f0; padding: 4px 10px; border-radius: 12px; font-size: 0.85rem; font-weight: 600;">
+                {{ activity.get_activity_type_display }}
+            </span>
+        </div>
+
+        <p style="margin: 4px 0;"><strong>Date:</strong> {{ activity.activity_date }}</p>
+
+        {% if activity.distance_km %}
+            <p style="margin: 4px 0;"><strong>Distance:</strong> {{ activity.distance_km }} km</p>
+        {% endif %}
+
+        {% if activity.notes %}
+            <p style="margin: 4px 0;"><strong>Notes:</strong> {{ activity.notes }}</p>
+        {% endif %}
+
+        <div class="card-actions" style="margin-top: 15px; display: flex; gap: 8px;">
+            <a href="{% url 'activities:update' pk=activity.pk %}" class="btn btn-sm btn-secondary">Edit</a>
+            <a href="{% url 'activities:delete' pk=activity.pk %}" class="btn btn-sm btn-danger">Delete</a>
+        </div>
+    </div>
+    {% empty %}
+    <p>No activity logs found matching your criteria.</p>
+    {% endfor %}
+</div>
+
+<!-- Debounce Script -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('activity-search-input');
+        const searchForm = document.getElementById('activity-search-form');
+        let timeout = null;
+
+        if (searchInput) {
+            const val = searchInput.value;
+            searchInput.value = '';
+            searchInput.focus();
+            searchInput.value = val;
+
+            searchInput.addEventListener('input', function() {
+                clearTimeout(timeout);
+                timeout = setTimeout(function() {
+                    searchForm.submit();
+                }, 400);
+            });
+        }
+    });
+</script>
 {% endblock %}
+

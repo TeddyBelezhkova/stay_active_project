@@ -3,41 +3,51 @@
 {% block title %}{{ participant.full_name }} - Profile{% endblock %}
 
 {% block content %}
-<div class="profile-header">
-    <h2>{{ participant.full_name }}</h2>
-    <p><strong>Department:</strong> {{ participant.department.name }} | <strong>Email:</strong> {{ participant.email }}</p>
-</div>
+<!-- Top Action Bar -->
+<div class="header-action-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <!-- Go Back Button -->
+    <a href="{% url 'participants:list' %}" class="btn btn-secondary">← Back to Participants</a>
 
-<hr>
-
-<div class="profile-section">
-    <h3>Awarded Badges</h3>
-    <div class="badges-row">
-        {% for badge in badges %}
-            <span class="badge-tag">🏆 {{ badge.title }}</span>
-        {% empty %}
-            <p>No badges earned yet.</p>
-        {% endfor %}
+    <!-- Profile Edit & Delete Buttons -->
+    <div style="display: flex; gap: 8px;">
+        <a href="{% url 'participants:edit' pk=participant.pk %}" class="btn btn-primary">Edit Profile</a>
+        <a href="{% url 'participants:delete' pk=participant.pk %}" class="btn btn-danger">Delete</a>
     </div>
-
-    <form method="post" action="{% url 'activities:award_badge' participant_pk=participant.pk %}" class="inline-form">
-        {% csrf_token %}
-        <label>Award Badge:</label>
-        {{ award_form.badge }}
-        <button type="submit" class="btn btn-sm btn-primary">Award</button>
-    </form>
 </div>
 
-<hr>
+<div class="card profile-card">
+    <h2>{{ participant.full_name }}</h2>
+    <p>
+        <strong>Department:</strong>
+        {% if participant.department %}
+            {{ participant.department.name }}
+        {% else %}
+            <em>Not assigned</em>
+        {% endif %}
+    </p>
+    <p><strong>Email:</strong> {{ participant.email }}</p>
 
-<div class="profile-section">
-    <h3>Activity History</h3>
-    <ul>
-        {% for act in activities %}
-            <li>{{ act.get_activity_type_display }} — {{ act.distance_km }} KM on {{ act.activity_date }}</li>
-        {% empty %}
-            <li>No activity logged yet.</li>
-        {% endfor %}
-    </ul>
+    <hr style="margin: 20px 0;">
+
+    <h3>🏆 Earned Badges</h3>
+    {% if badges %}
+        <ul>
+            {% for badge in badges %}
+                <li><strong>{{ badge.title }}</strong> — {{ badge.criteria }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No badges earned yet.</p>
+    {% endif %}
+
+    <!-- Direct Badge Award Form -->
+    <div class="award-badge-section" style="margin-top: 25px; padding: 15px; background: #f8f9fa; border-radius: 6px;">
+        <h4 style="margin-top: 0;">🏅 Award New Badge</h4>
+        <form method="post" style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+            {% csrf_token %}
+            {{ award_form.as_p }}
+            <button type="submit" class="btn btn-sm btn-primary">Grant Badge</button>
+        </form>
+    </div>
 </div>
 {% endblock %}

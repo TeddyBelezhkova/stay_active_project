@@ -10,12 +10,21 @@
 
 <ul>
     {% for department in departments %}
-        <li style="margin-bottom: 10px;">
-            <strong>{{ department.name }}</strong> — {{ department.description }}
-            <span style="margin-bottom: 15px;">
+        <li style="margin-bottom: 15px; padding: 12px; background: #f8f9fa; border-radius: 6px;">
+            <div>
+                <strong>{{ department.name }}</strong> — {{ department.description }}
+            </div>
+
+            <!-- Department Metrics -->
+            <div style="margin: 8px 0; font-size: 0.95rem; color: #4a5568;">
+                <span><strong>Total Members:</strong> {{ department.participant_count }}</span> |
+                <span><strong>Total Workouts Logged:</strong> {{ department.activity_count }}</span>
+            </div>
+
+            <div>
                 <a href="{% url 'participants:department_edit' pk=department.pk %}" class="btn btn-sm btn-secondary">Edit</a>
                 <a href="{% url 'participants:department_delete' pk=department.pk %}" class="btn btn-sm btn-danger">Delete</a>
-            </span>
+            </div>
         </li>
     {% empty %}
         <li>No departments added yet.</li>

@@ -2,10 +2,15 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .models import Department, Participant
 from .forms import DepartmentForm, ParticipantForm
 from activities.forms import AwardBadgeForm
+from django.db.models import Q, Count
+from django.contrib import messages
 
-
+#-----------DEPARTMENTS-------------#
 def department_list(request):
-    departments = Department.objects.all()
+    departments = Department.objects.annotate(
+        participant_count=Count('participants', distinct=True),
+        activity_count=Count('participants__activities', distinct=True),
+    )
     return render(request, 'participants/department_list.html', {'departments': departments})
 
 
@@ -38,16 +43,55 @@ def department_delete(request, pk):
     return render(request, 'participants/department_confirm_delete.html', {'department': department})
 
 
+
+#-----------PARTICIPANTS-------------#
 def participant_list(request):
+    search_query = request.GET.get('q', '').strip()
+    department_id = request.GET.get('department', '')
+
+    departments = Department.objects.all()
     participants = Participant.objects.select_related('department').all()
-    return render(request, 'participants/participant_list.html', {'participants': participants})
+
+    #search filter
+    if search_query:
+        participants = participants.filter(
+            Q(first_name__icontains=search_query) |
+            Q(last_name__icontains=search_query) |
+            Q(email__icontains=search_query)
+        )
+
+    #department filter
+    if department_id:
+        participants = participants.filter(department_id=department_id)
+
+    context = {
+        'participants': participants,
+        'departments': departments,
+        'search_query': search_query,
+        'selected_department': department_id,
+    }
+
+
+    return render(request, 'participants/participant_list.html', context)
 
 
 def participant_detail(request, pk):
     participant = get_object_or_404(Participant, pk=pk)
     activities = participant.activities.all()
     badges = participant.badges.all()
-    award_form = AwardBadgeForm()
+
+    if request.method == 'POST':
+        award_form = AwardBadgeForm(request.POST)
+        if award_form.is_valid():
+            badge = award_form.cleaned_data['badge']
+            if badge in participant.badges.all():
+                messages.error(request, f"'{participant.full_name}' already has the {badge.title} badge!")
+            else:
+                participant.badges.add(badge)
+                messages.success(request, f"Awarded '{badge.title}' badge to {participant.full_name}! 🏆")
+            return redirect('participants:detail', pk=participant.pk)
+    else:
+        award_form = AwardBadgeForm()
 
     context = {
         'participant': participant,
@@ -63,6 +107,7 @@ def participant_create(request):
         form = ParticipantForm(request.POST)
         if form.is_valid():
             participant = form.save()
+            messages.success(request, f"Participant '{participant.full_name}' was created successfully!")
             return redirect('participants:detail', pk=participant.pk)
     else:
         form = ParticipantForm()
@@ -75,6 +120,7 @@ def participant_update(request, pk):
         form = ParticipantForm(request.POST, instance=participant)
         if form.is_valid():
             form.save()
+            messages.success(request, f"Updated details for '{participant.full_name}'.")
             return redirect('participants:detail', pk=participant.pk)
     else:
         form = ParticipantForm(instance=participant)
@@ -84,6 +130,8 @@ def participant_update(request, pk):
 def participant_delete(request, pk):
     participant = get_object_or_404(Participant, pk=pk)
     if request.method == 'POST':
+        participant_name = participant.full_name
         participant.delete()
+        messages.info(request, f"Participant '{participant_name}' was deleted.")
         return redirect('participants:list')
     return render(request, 'participants/participant_confirm_delete.html', {'participant': participant})

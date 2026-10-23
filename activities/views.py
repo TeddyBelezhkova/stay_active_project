@@ -6,9 +6,30 @@ from django.db.models import Count, Q
 
 # Activity Log Views
 def activity_list(request):
-    activities = ActivityLog.objects.select_related('participant').all()
-    return render(request, 'activities/activity_list.html', {'activities': activities})
+    search_query = request.GET.get('q', '').strip()
+    activity_type = request.GET.get('type', '')
 
+    activities = ActivityLog.objects.select_related('participant').all()
+
+    if search_query:
+        activities = activities.filter(
+            Q(notes__icontains=search_query) |
+            Q(participant__first_name__icontains=search_query) |
+            Q(participant__last_name__icontains=search_query)
+        )
+
+    if activity_type:
+        activities = activities.filter(activity_type=activity_type)
+
+    activity_type_choices = ActivityLog.ACTIVITY_TYPES if hasattr(ActivityLog, 'ACTIVITY_TYPES') else ActivityLog._meta.get_field('activity_type').choices
+
+    context = {
+        'activities': activities,
+        'search_query': search_query,
+        'selected_type': activity_type,
+        'activity_types': activity_type_choices,
+    }
+    return render(request, 'activities/activity_list.html', context)
 
 def activity_create(request):
     if request.method == 'POST':
