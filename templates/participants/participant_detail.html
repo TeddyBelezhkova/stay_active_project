@@ -1,53 +1,109 @@
 {% extends 'shared/base.html' %}
+{% load static %}
 
 {% block title %}{{ participant.full_name }} - Profile{% endblock %}
 
 {% block content %}
-<!-- Top Action Bar -->
-<div class="header-action-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-    <!-- Go Back Button -->
-    <a href="{% url 'participants:list' %}" class="btn btn-secondary">← Back to Participants</a>
-
-    <!-- Profile Edit & Delete Buttons -->
-    <div style="display: flex; gap: 8px;">
-        <a href="{% url 'participants:edit' pk=participant.pk %}" class="btn btn-primary">Edit Profile</a>
-        <a href="{% url 'participants:delete' pk=participant.pk %}" class="btn btn-danger">Delete</a>
+<!-- Top Navigation / Action Bar -->
+<div class="header-action-row" style="margin-bottom: 24px;">
+    <a href="{% url 'participants:list' %}" class="btn btn-secondary" style="padding: 10px 18px; font-size: var(--fs-sm);">
+        &larr; Back to Participants
+    </a>
+    <div style="display: flex; gap: 12px;">
+        <a href="{% url 'participants:edit' pk=participant.pk %}" class="btn btn-primary" style="padding: 10px 20px; font-size: var(--fs-sm);">
+            Edit Profile
+        </a>
+        <a href="{% url 'participants:delete' pk=participant.pk %}" class="btn btn-danger" style="padding: 10px 20px; font-size: var(--fs-sm);">
+            Delete
+        </a>
     </div>
 </div>
 
-<div class="card profile-card">
-    <h2>{{ participant.full_name }}</h2>
-    <p>
-        <strong>Department:</strong>
-        {% if participant.department %}
-            {{ participant.department.name }}
-        {% else %}
-            <em>Not assigned</em>
-        {% endif %}
-    </p>
-    <p><strong>Email:</strong> {{ participant.email }}</p>
+<!-- Main Participant Profile Card -->
+<div class="card" style="max-width: 900px; margin: 0 auto 36px; padding: 36px; border-top: 4px solid var(--electric-blue);">
 
-    <hr style="margin: 20px 0;">
+    <!-- User Info Header -->
+    <div style="margin-bottom: 24px;">
+        <h2 style="font-size: var(--fs-2xl); color: #ffffff; margin-bottom: 8px;">{{ participant.full_name }}</h2>
+        <p style="font-size: var(--fs-base); color: var(--text-secondary); margin-bottom: 4px;">
+            <strong>Department:</strong> <span style="color: var(--electric-blue);">{{ participant.department.name|default:"General" }}</span>
+        </p>
+        <p style="font-size: var(--fs-base); color: var(--text-secondary); margin: 0;">
+            <strong>Email:</strong> {{ participant.email }}
+        </p>
+    </div>
 
-    <h3>🏆 Earned Badges</h3>
-    {% if badges %}
-        <ul>
-            {% for badge in badges %}
-                <li><strong>{{ badge.title }}</strong> — {{ badge.criteria }}</li>
+    <hr style="border: 0; height: 1px; background: var(--card-border); margin: 28px 0;">
+
+    <!-- Earned Badges Section -->
+    <div style="margin-bottom: 36px;">
+        <h3 style="display: flex; align-items: center; gap: 10px; font-size: var(--fs-xl); color: #ffffff; margin-bottom: 18px;">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 6px rgba(251,191,36,0.5));">
+                <path d="M6 9H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h2"/>
+                <path d="M18 9h2a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2"/>
+                <path d="M4 5h16v4a6 6 0 0 1-12 0V5Z"/>
+                <path d="M12 15v5"/>
+                <path d="M8 20h8"/>
+            </svg>
+            Earned Badges ({{ participant.badges.count }})
+        </h3>
+
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+            {% for badge in participant.badges.all %}
+                <div class="badge-item" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; border-radius: var(--border-radius-sm); background: var(--card-surface-elevated); border: 1px solid rgba(255, 255, 255, 0.1);">
+
+                    <div style="display: flex; align-items: center; gap: 14px;">
+                        <img src="{% static 'images/badges/' %}{{ badge.slug }}.png"
+                             alt="{{ badge.title }}"
+                             style="width: 42px; height: 42px; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));">
+                        <div>
+                            <div style="font-weight: 700; font-size: var(--fs-base); color: #ffffff;">{{ badge.title }}</div>
+                            <div style="font-size: var(--fs-xs); color: var(--text-muted); font-weight: 400;">{{ badge.criteria }}</div>
+                        </div>
+                    </div>
+
+                    <!-- Revoke Form Button -->
+                    <form action="{% url 'participants:revoke_badge' participant_pk=participant.pk badge_pk=badge.pk %}" method="post" style="margin: 0;" onsubmit="return confirm('Revoke {{ badge.title }} from {{ participant.full_name }}?');">
+                        {% csrf_token %}
+                        <button type="submit" title="Revoke badge" style="background: rgba(244, 63, 94, 0.15); border: 1px solid rgba(244, 63, 94, 0.35); color: #f43f5e; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px; transition: all 0.2s;" onmouseover="this.style.background='rgba(244, 63, 94, 0.35)'" onmouseout="this.style.background='rgba(244, 63, 94, 0.15)'">
+                            ✕
+                        </button>
+                    </form>
+
+                </div>
+            {% empty %}
+                <p style="color: var(--text-muted); font-style: italic; font-size: var(--fs-base);">No badges awarded to this participant yet.</p>
             {% endfor %}
-        </ul>
-    {% else %}
-        <p>No badges earned yet.</p>
-    {% endif %}
+        </div>
+    </div>
 
-    <!-- Direct Badge Award Form -->
-    <div class="award-badge-section" style="margin-top: 25px; padding: 15px; background: #f8f9fa; border-radius: 6px;">
-        <h4 style="margin-top: 0;">🏅 Award New Badge</h4>
-        <form method="post" style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+    <!-- Award New Badge Form (Dark Surface Box) -->
+    <div style="background: rgba(11, 17, 32, 0.7); border: 1px solid var(--card-border); border-radius: var(--border-radius-lg); padding: 24px; box-shadow: var(--shadow-3d);">
+        <h4 style="display: flex; align-items: center; gap: 10px; font-size: var(--fs-lg); color: #ffffff; margin-bottom: 14px;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="8" r="6"/>
+                <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>
+            </svg>
+            Award New Badge
+        </h4>
+
+        <form method="post" style="display: flex; gap: 14px; align-items: center; flex-wrap: wrap;">
             {% csrf_token %}
-            {{ award_form.as_p }}
-            <button type="submit" class="btn btn-sm btn-primary">Grant Badge</button>
+            <div style="flex: 1; min-width: 240px;">
+                <label for="{{ award_form.badge.id_for_label }}" style="display: block; font-size: var(--fs-sm); color: var(--text-secondary); margin-bottom: 6px;">
+                    Select Badge:
+                </label>
+                <select name="{{ award_form.badge.name }}" id="{{ award_form.badge.id_for_label }}" required style="margin-bottom: 0;">
+                    {% for value, label in award_form.badge.field.choices %}
+                        <option value="{{ value }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary" style="align-self: flex-end; padding: 13px 24px; white-space: nowrap;">
+                Grant Badge
+            </button>
         </form>
     </div>
+
 </div>
 {% endblock %}

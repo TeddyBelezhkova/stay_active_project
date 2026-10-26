@@ -34,6 +34,12 @@ class ActivityLogForm(forms.ModelForm):
             'is_private': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
              }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk:
+            self.fields['participant'].disabled = True
+            self.fields['participant'].help_text = "Participant assignment cannot be modified after logging."
+
 class CommentForm(forms.ModelForm):
     class Meta:
         model = ActivityComment
@@ -44,7 +50,7 @@ class CommentForm(forms.ModelForm):
         }
 
 class AwardBadgeForm(forms.Form):
-    #UI Form to award an existing badge to a participant.
+    #award an existing badge to a participant.
     badge = forms.ModelChoiceField(
         queryset=Badge.objects.all(),
         widget=forms.Select(attrs={'class': 'form-select'}),

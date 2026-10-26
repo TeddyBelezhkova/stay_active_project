@@ -160,7 +160,7 @@ def badge_delete(request, pk):
     if request.method == 'POST':
         badge.delete()
         return redirect('activities:badge_list')
-    return render(request, 'activities/badge_delete.html', {'badge': badge})
+    return render(request, 'activities/badge_confirm_delete.html', {'badge': badge})
 
 
 

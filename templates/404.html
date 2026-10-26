@@ -1,0 +1,39 @@
+{% extends 'shared/base.html' %}
+
+{% block title %}Page Not Found - Stay Active{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 650px; margin: 60px auto; text-align: center;">
+    <div class="card" style="padding: 48px 32px; border-top: 4px solid var(--accent-coral);">
+        
+        <div style="margin-bottom: 20px;">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--accent-coral)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 12px rgba(244,63,94,0.4));">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+        </div>
+
+        <h1 style="font-size: 3.5rem; font-weight: 800; color: #ffffff; margin-bottom: 8px; letter-spacing: -1px;">
+            404
+        </h1>
+        
+        <h2 style="font-size: var(--fs-xl); color: #ffffff; margin-bottom: 14px;">
+            Workout Trail Lost
+        </h2>
+
+        <p style="color: var(--text-secondary); font-size: var(--fs-base); line-height: 1.6; margin-bottom: 28px;">
+            The page or record you are looking for has been moved, deleted, or does not exist on this active workspace.
+        </p>
+
+        <div style="display: flex; justify-content: center; gap: 14px;">
+            <a href="{% url 'common:home' %}" class="btn btn-primary" style="padding: 10px 22px;">
+                Return to Workspace
+            </a>
+            <a href="{% url 'activities:list' %}" class="btn btn-secondary" style="padding: 10px 22px;">
+                View Activities
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

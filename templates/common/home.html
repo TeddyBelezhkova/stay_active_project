@@ -1,60 +1,86 @@
 {% extends 'shared/base.html' %}
+{% load static %}
 
 {% block title %}Home - Stay Active{% endblock %}
 
 {% block content %}
-<section class="hero-section">
-    <h2>Welcome to Stay Active Workspace!</h2>
-    <p>Track your physical achievements, earn corporate milestones, and showcase your workouts.</p>
-</section>
+<!-- Metrics Stats Grid -->
+<div class="hero-section">
+    <h2>Workspace Performance</h2>
+    <p>Track activities, earn badges, and motivate your team members.</p>
+</div>
 
-<div class="stats-grid">
+<div class="stats-grid" style="margin-bottom: 50px;">
     <div class="stat-card">
-        <h3>{{ total_participants|default:0 }}</h3>
+        <h3>{{ total_participants|default:"0" }}</h3>
         <p>Active Participants</p>
     </div>
     <div class="stat-card">
-        <h3>{{ total_departments|default:0 }}</h3>
+        <h3>{{ total_departments|default:"0" }}</h3>
         <p>Departments</p>
     </div>
     <div class="stat-card">
-        <h3>{{ total_activities|default:0 }}</h3>
+        <h3>{{ total_activities|default:"0" }}</h3>
         <p>Activities Logged</p>
     </div>
     <div class="stat-card">
-        <h3>{{ total_badges|default:0 }}</h3>
+        <h3>{{ total_badges|default:"0" }}</h3>
         <p>Badges Awarded</p>
     </div>
 </div>
 
-<hr style="margin: 40px 0;">
+<!-- Corporate Leaderboard Section -->
+<div class="header-action-row" style="justify-content: flex-start; gap: 12px; margin-bottom: 24px;">
+    <!-- Insert Here -->
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 8px rgba(251,191,36,0.6));">
+      <path d="M6 9H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h2"/>
+      <path d="M18 9h2a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2"/>
+      <path d="M4 5h16v4a6 6 0 0 1-12 0V5Z"/>
+      <path d="M12 15v5"/>
+      <path d="M8 20h8"/>
+    </svg>
+    <h2 style="font-size: var(--fs-2xl); margin: 0; color: #ffffff;">Corporate Badge Leaderboard</h2>
+</div>
 
-<section class="leaderboard-section">
-        <h2 style="text-align: center; margin-bottom: 20px;">🏆 Corporate Badge Leaderboard</h2>
+<div style="display: flex; flex-direction: column; gap: 20px;">
+    {% for participant in leaderboard %}
+    <div class="card leaderboard-row" style="display: flex; align-items: center; justify-content: space-between; padding: 24px 30px; border-left: 5px solid var(--accent-gold);">
 
-    {% for p in leaderboard %}
-    <div class="leaderboard-card" style="background: #eef2f7; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 6px solid #3498db;">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div>
-                <h3>
-                    {% if forloop.counter == 1 %}🥇{% elif forloop.counter == 2 %}🥈{% elif forloop.counter == 3 %}🥉{% else %}⭐{% endif %}
-                    {{ p.full_name }}
-                </h3>
-                <p><strong>Department:</strong> {{ p.department.name }} | <strong>Total Badges:</strong> {{ p.badge_count }}</p>
+        <!-- Left: Participant Info -->
+        <div style="flex: 1;">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 6px;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="8" r="6"/>
+                    <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>
+                </svg>
+    <span style="font-size: var(--fs-lg); font-weight: 800; color: var(--accent-gold);">#{{ forloop.counter }}</span>
+    <h3 style="margin: 0; font-size: var(--fs-xl); color: #ffffff;">{{ participant.full_name }}</h3>
             </div>
+            <p style="margin: 0; font-size: var(--fs-sm); color: var(--text-secondary);">
+                Department: <strong style="color: var(--electric-blue);">{{ participant.department.name|default:"General" }}</strong>
+                &bull; Total Badges: <strong style="color: #ffffff;">{{ participant.badges.count }}</strong>
+            </p>
         </div>
-        <div class="badge-gallery" style="margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
-            {% for badge in p.badges.all %}
-                <span style="background: #fff; padding: 5px 10px; border-radius: 15px; border: 1px solid #ccc; font-size: 0.85rem;">
-                    🏆 {{ badge.title }}
-                </span>
+
+        <!-- Right: Real Badges Collection -->
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; justify-content: flex-end;">
+            {% for badge in participant.badges.all %}
+                <div class="badge-item" title="{{ badge.title }}: {{ badge.criteria }}">
+                    <img src="{% static 'images/badges/' %}{{ badge.slug }}.png"
+                         alt="{{ badge.title }}"
+                         style="filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));">
+                    <span style="font-weight: 600; font-size: var(--fs-sm); color: #ffffff;">{{ badge.title }}</span>
+                </div>
             {% empty %}
-                <small>No badges earned yet.</small>
+                <span style="color: var(--text-muted); font-size: var(--fs-sm); font-style: italic;">No badges earned yet</span>
             {% endfor %}
         </div>
+
     </div>
     {% empty %}
-    <p style="text-align: center;">No participants on the leaderboard yet.</p>
+    <div class="card" style="text-align: center; padding: 36px;">
+        <p>No participants registered on the leaderboard yet.</p>
+    </div>
     {% endfor %}
-</section>
+</div>
 {% endblock %}

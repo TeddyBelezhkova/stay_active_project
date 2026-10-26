@@ -16,4 +16,5 @@ urlpatterns = [
     path('<int:pk>/', views.participant_detail, name='detail'),
     path('<int:pk>/edit/', views.participant_update, name='edit'),
     path('<int:pk>/delete/', views.participant_delete, name='delete'),
+    path('<int:participant_pk>/badges/<int:badge_pk>/revoke/', views.revoke_badge, name='revoke_badge'),
 ]

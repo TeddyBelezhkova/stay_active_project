@@ -2,14 +2,29 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .models import Department, Participant
 from .forms import DepartmentForm, ParticipantForm
 from activities.forms import AwardBadgeForm
-from django.db.models import Q, Count
+from activities.models import Badge, ActivityLog  # <-- Added ActivityLog
+from django.db.models import Q, Count, OuterRef, Subquery  # <-- Added OuterRef, Subquery
 from django.contrib import messages
 
 #-----------DEPARTMENTS-------------#
 def department_list(request):
+    # Subquery: Count all activities done by participants belonging to this department
+    activity_count_subquery = ActivityLog.objects.filter(
+        participant__department=OuterRef('pk')
+    ).values('participant__department').annotate(
+        total=Count('pk')
+    ).values('total')
+
+    # Subquery: Count all participants belonging to this department
+    participant_count_subquery = Participant.objects.filter(
+        department=OuterRef('pk')
+    ).values('department').annotate(
+        total=Count('pk')
+    ).values('total')
+
     departments = Department.objects.annotate(
-        participant_count=Count('participants', distinct=True),
-        activity_count=Count('participants__activities', distinct=True),
+        participant_count=Subquery(participant_count_subquery),
+        activity_count=Subquery(activity_count_subquery),
     )
     return render(request, 'participants/department_list.html', {'departments': departments})
 
@@ -135,3 +150,14 @@ def participant_delete(request, pk):
         messages.info(request, f"Participant '{participant_name}' was deleted.")
         return redirect('participants:list')
     return render(request, 'participants/participant_confirm_delete.html', {'participant': participant})
+
+
+def revoke_badge(request, participant_pk, badge_pk):
+    participant = get_object_or_404(Participant, pk=participant_pk)
+    badge = get_object_or_404(Badge, pk=badge_pk)
+
+    if request.method == 'POST':
+        participant.badges.remove(badge)
+        messages.info(request, f"Badge '{badge.title}' was revoked from {participant.full_name}.")
+
+    return redirect('participants:detail', pk=participant.pk)

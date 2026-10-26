@@ -1,96 +1,88 @@
 {% extends 'shared/base.html' %}
-
+{% load activity_extras %}
 {% block title %}Activity Logs - Stay Active{% endblock %}
 
 {% block content %}
-<div class="header-action-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+<div class="header-action-row">
     <h2>Activity Logs</h2>
     <a href="{% url 'activities:create' %}" class="btn btn-primary">+ Log Workout</a>
 </div>
 
-<!-- Search & Type Filter Bar -->
-<div class="filter-bar" style="margin-bottom: 25px; background: #f8f9fa; padding: 16px; border-radius: 8px;">
-    <form id="activity-search-form" method="get" action="{% url 'activities:list' %}" style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 0;">
+<!-- Filter bar with 400ms auto-search -->
+<div class="filter-bar">
+    <form id="activityFilterForm" method="get" style="display: flex; flex-direction: column; gap: 12px;">
+        <input type="search"
+               id="activitySearchInput"
+               name="q"
+               placeholder="Search by notes or participant name..."
+               value="{{ search_query|default:'' }}"
+               autocomplete="off">
 
-        <!-- Live Search Input -->
-        <input
-            type="text"
-            id="activity-search-input"
-            name="q"
-            value="{{ search_query }}"
-            placeholder="Search by notes or participant name..."
-            autocomplete="off"
-            style="padding: 8px 12px; border-radius: 4px; border: 1px solid #ccc; flex: 1; min-width: 220px;"
-        />
-
-        <!-- Activity Type Dropdown -->
-        <select name="type" onchange="this.form.submit()" style="padding: 8px 12px; border-radius: 4px; border: 1px solid #ccc;">
+        <select name="type" onchange="document.getElementById('activityFilterForm').submit();">
             <option value="">All Activity Types</option>
             {% for code, label in activity_types %}
-                <option value="{{ code }}" {% if selected_type == code %}selected{% endif %}>
-                    {{ label }}
-                </option>
+                <option value="{{ code }}" {% if selected_type == code %}selected{% endif %}>{{ label }}</option>
             {% endfor %}
         </select>
-
-        {% if search_query or selected_type %}
-            <a href="{% url 'activities:list' %}" class="btn btn-secondary">Clear Filters</a>
-        {% endif %}
     </form>
 </div>
 
-<!-- Formatted Cards Grid -->
+<!-- 3D card grid -->
 <div class="cards-grid">
     {% for activity in activities %}
-    <div class="card" style="background: #fff; padding: 18px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <h3 style="margin: 0;">{{ activity.participant.full_name }}</h3>
-            <span style="background: #e2e8f0; padding: 4px 10px; border-radius: 12px; font-size: 0.85rem; font-weight: 600;">
-                {{ activity.get_activity_type_display }}
-            </span>
+    <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                <h3 style="margin: 0;">{{ activity.participant.full_name }}</h3>
+                <span class="activity-badge-pill">{{ activity.get_activity_type_display }}</span>
+            </div>
+            <p>
+                <strong>Distance / Effort:</strong> {{ activity.distance_km|format_effort }}
+                <span style="font-size: var(--fs-xs); color: var(--electric-blue); margin-left: 6px;">
+                    ({{ activity.distance_km|workout_intensity }})
+                </span>
+            </p>
+            <p><strong>Date:</strong> {{ activity.activity_date }}</p>
+            {% if activity.notes %}
+                <p style="font-size: var(--fs-sm); font-style: italic; color: var(--text-muted);">"{{ activity.notes }}"</p>
+            {% endif %}
         </div>
 
-        <p style="margin: 4px 0;"><strong>Date:</strong> {{ activity.activity_date }}</p>
-
-        {% if activity.distance_km %}
-            <p style="margin: 4px 0;"><strong>Distance:</strong> {{ activity.distance_km }} km</p>
-        {% endif %}
-
-        {% if activity.notes %}
-            <p style="margin: 4px 0;"><strong>Notes:</strong> {{ activity.notes }}</p>
-        {% endif %}
-
-        <div class="card-actions" style="margin-top: 15px; display: flex; gap: 8px;">
+        <div style="margin-top: 22px; display: flex; gap: 10px;">
             <a href="{% url 'activities:update' pk=activity.pk %}" class="btn btn-sm btn-secondary">Edit</a>
             <a href="{% url 'activities:delete' pk=activity.pk %}" class="btn btn-sm btn-danger">Delete</a>
         </div>
     </div>
     {% empty %}
-    <p>No activity logs found matching your criteria.</p>
+    <div class="card" style="grid-column: 1 / -1; text-align: center;">
+        <p>No activity logs recorded yet.</p>
+    </div>
     {% endfor %}
 </div>
 
-<!-- Debounce Script -->
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const searchInput = document.getElementById('activity-search-input');
-        const searchForm = document.getElementById('activity-search-form');
-        let timeout = null;
+document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("activitySearchInput");
+    const filterForm = document.getElementById("activityFilterForm");
 
-        if (searchInput) {
-            const val = searchInput.value;
-            searchInput.value = '';
+    if (searchInput && filterForm) {
+        let debounceTimer;
+
+        // Auto-submit after 400ms pause in typing
+        searchInput.addEventListener("input", function () {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(function () {
+                filterForm.submit();
+            }, 400);
+        });
+
+        // Retain focus and keep cursor at end of input after reload
+        if (searchInput.value) {
+            const end = searchInput.value.length;
             searchInput.focus();
-            searchInput.value = val;
-
-            searchInput.addEventListener('input', function() {
-                clearTimeout(timeout);
-                timeout = setTimeout(function() {
-                    searchForm.submit();
-                }, 400);
-            });
+            searchInput.setSelectionRange(end, end);
         }
-    });
+    }
+});
 </script>
 {% endblock %}
-

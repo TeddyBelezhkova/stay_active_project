@@ -1,6 +1,6 @@
 {% extends 'shared/base.html' %}
 
-{% block title %}Departments – Stay Active{% endblock %}
+{% block title %}Departments - Stay Active{% endblock %}
 
 {% block content %}
 <div class="header-action-row">
@@ -8,26 +8,27 @@
     <a href="{% url 'participants:department_create' %}" class="btn btn-primary">+ Add Department</a>
 </div>
 
-<ul>
+<div class="cards-grid">
     {% for department in departments %}
-        <li style="margin-bottom: 15px; padding: 12px; background: #f8f9fa; border-radius: 6px;">
-            <div>
-                <strong>{{ department.name }}</strong> — {{ department.description }}
-            </div>
+    <div class="card department-card" style="border-top: 4px solid var(--electric-blue);">
+        <h3 style="font-size: var(--fs-xl); margin-bottom: 12px;">{{ department.name }}</h3>
 
-            <!-- Department Metrics -->
-            <div style="margin: 8px 0; font-size: 0.95rem; color: #4a5568;">
-                <span><strong>Total Members:</strong> {{ department.participant_count }}</span> |
-                <span><strong>Total Workouts Logged:</strong> {{ department.activity_count }}</span>
-            </div>
+        <p style="margin: 6px 0;">
+            <strong>Total Members:</strong> {{ department.participant_count|default:"0" }}
+        </p>
+        <p style="margin: 6px 0;">
+            <strong>Total Workouts Logged:</strong> {{ department.activity_count|default:"0" }}
+        </p>
 
-            <div>
-                <a href="{% url 'participants:department_edit' pk=department.pk %}" class="btn btn-sm btn-secondary">Edit</a>
-                <a href="{% url 'participants:department_delete' pk=department.pk %}" class="btn btn-sm btn-danger">Delete</a>
-            </div>
-        </li>
+        <div style="margin-top: 24px; display: flex; gap: 10px;">
+            <a href="{% url 'participants:department_edit' pk=department.pk %}" class="btn btn-sm btn-secondary">Edit</a>
+            <a href="{% url 'participants:department_delete' pk=department.pk %}" class="btn btn-sm btn-danger">Delete</a>
+        </div>
+    </div>
     {% empty %}
-        <li>No departments added yet.</li>
+    <div class="card" style="grid-column: 1 / -1; text-align: center;">
+        <p>No departments added yet.</p>
+    </div>
     {% endfor %}
-</ul>
+</div>
 {% endblock %}
